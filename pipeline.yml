@@ -1,0 +1,41 @@
+---
+resources:
+- name: rs-chef
+  type: git
+  source:
+    uri: https://github.com/aink99/chef_doc.git
+    branch: master
+
+jobs:
+- name: cheftest
+  public: true
+  plan:
+  - get: rs-chef
+  - task: Upload
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        #source: {repository: busybox}
+        #source: {repository: chef/chefdk}
+        source: 
+          repository: '192.168.0.150:5000/mychefdk'
+          insecure_registries: ["192.168.0.150:5000"]
+
+
+      inputs:
+      - name: rs-chef
+      
+      run:
+        path: sh
+        args: 
+        - -exc
+        - |
+          mv /chef-repo-lab .
+          pwd      
+          cp -pr rs-chef chef-repo-lab/cookbooks/
+          ls -alht
+          cd chef-repo-lab/cookbooks/rs-chef
+          ls
+          berks install
+          berks upload
